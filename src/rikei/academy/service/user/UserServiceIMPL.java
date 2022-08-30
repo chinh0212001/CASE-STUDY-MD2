@@ -1,10 +1,15 @@
 package rikei.academy.service.user;
 
 import rikei.academy.config.Config;
+import rikei.academy.model.Role;
+import rikei.academy.model.RoleName;
 import rikei.academy.model.User;
+import rikei.academy.service.role.RoleServiceIMPL;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UserServiceIMPL implements IUserService{
     static String PATH_USER = "src/rikei/academy/data/user.txt";
@@ -12,10 +17,23 @@ public class UserServiceIMPL implements IUserService{
     static Config<List<User>> config = new Config<>();
     static List<User> userList = config.read(PATH_USER);
     static {
-        if (userList == null){
+        if (userList == null || userList.size() == 0) {
             userList = new ArrayList<>();
+            Set<Role> roles = new HashSet<>();
+            roles.add(new RoleServiceIMPL().findByRoleName(RoleName.COACH));
+            userList.add(
+                    new User(
+                            0,
+                            "Admin",
+                            "admin",
+                            "admin@admin.admin",
+                            "admin",
+                            roles
+                    )
+            );
         }
     }
+
     @Override
     public List<User> findAll() {
         config.write(PATH_USER,userList);
@@ -25,7 +43,7 @@ public class UserServiceIMPL implements IUserService{
     @Override
     public void save(User user) {
         userList.add(user);
-        config.write(PATH_USER,userList);
+        updateData();
     }
 
     @Override
@@ -104,9 +122,32 @@ public class UserServiceIMPL implements IUserService{
     }
 
     @Override
+    public int getLastId() {
+        return userList.get(userList.size()-1).getId()+1;
+    }
+
+    @Override
+    public void updateData() {
+        config.write(PATH_USER,userList);
+
+    }
+
+    @Override
+    public void changeRole(int id, Role role) {
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        findById(id).setRoles(roles);
+        updateData();
+
+    }
+
+    @Override
     public void changeStatus(int id) {
         User user = findById(id);
         user.setStatus(!user.isStatus());
-        config.write(PATH_USER,userList);
+        updateData();
+
     }
+
+
 }

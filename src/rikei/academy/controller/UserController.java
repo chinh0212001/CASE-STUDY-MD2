@@ -11,15 +11,19 @@ import rikei.academy.service.role.RoleServiceIMPL;
 import rikei.academy.service.user.IUserService;
 import rikei.academy.service.user.UserServiceIMPL;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class UserController {
     IUserService userService = new UserServiceIMPL();
+
+    User currentUser = userService.getCurrentUser();
     IRoleService roleService = new RoleServiceIMPL();
 
     public List<User> getUserList() {
+        List<User> userList = new ArrayList<>(userService.findAll());
         return userService.findAll();
     }
 
@@ -57,21 +61,70 @@ public class UserController {
         return new ResponseMessenger("success");
     }
 
-    public ResponseMessenger login(SignInDTO signInDTO){
-        if (!userService.checkLogin(signInDTO.getUsername(),signInDTO.getPassword())){
+    public ResponseMessenger login(SignInDTO signInDTO) {
+        if(userService.findByUsername(signInDTO.getUsername()).isStatus()) {
+            return new ResponseMessenger("blocked");
+        }
+        if (!userService.checkLogin(signInDTO.getUsername(), signInDTO.getPassword())) {
             return new ResponseMessenger("Login_failure");
         }
         User login = userService.findByUsername(signInDTO.getUsername());
         userService.saveCurrentUser(login);
-        return  new ResponseMessenger("Login_success");
+        return new ResponseMessenger("Login_success");
     }
 
-    public User getCurrentUser(){
+    public User getCurrentUser() {
         return userService.getCurrentUser();
 
     }
-    public void logOut(){
+
+    public void logOut() {
         userService.saveCurrentUser(null);
+    }
+
+    public ResponseMessenger changePassword(String oldPassword, String newPassword) {
+        if (!oldPassword.equals(currentUser.getPassword())) {
+            return new ResponseMessenger("not_match");
+        }
+        currentUser.setPassword(newPassword);
+        userService.updateData();
+        return new ResponseMessenger("success");
+    }
+
+    public ResponseMessenger deleteUser(int id) {
+        if (userService.findById(id) == null || id == 0) {
+            return new ResponseMessenger("not_found");
+        }
+        userService.deleteById(id);
+        return new ResponseMessenger("success");
+    }
+
+    public int getLastId() {
+        return userService.getLastId();
+    }
+
+    public ResponseMessenger changeRole(int id, String roleName) {
+        if (userService.findById(id) == null || id == 0) {
+            return new ResponseMessenger("not_fond");
+        }
+        if (!roleName.equals("player") && !roleName.equals("pm")) {
+            return new ResponseMessenger("invalid_role");
+        }
+        Role role = roleName.equals("player") ? roleService.findByRoleName(RoleName.PLAYER) : roleService.findByRoleName(RoleName.PM);
+        userService.changeRole(id,role);
+        return new ResponseMessenger("success");
+    }
+    public ResponseMessenger blockUser(int id){
+        if (userService.findById(id)==null || id == 0){
+            return new ResponseMessenger("not_found");
+        }
+        userService.changeStatus(id);
+        boolean check = userService.findById(id).isStatus();
+        if (check){
+            return new ResponseMessenger("blocked");
+        }else {
+            return new ResponseMessenger("unblocked");
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 package rikei.academy.service.user;
 
+import rikei.academy.model.Role;
 import rikei.academy.model.User;
 import rikei.academy.service.IGenericService;
 
@@ -11,5 +12,9 @@ public interface IUserService extends IGenericService<User> {
     User getCurrentUser();
     void saveCurrentUser(User user);
     User findByUsername(String username);
+    int getLastId();
+    void updateData();
+    void changeRole(int id , Role role);
+    void changeStatus(int id);
 
 }

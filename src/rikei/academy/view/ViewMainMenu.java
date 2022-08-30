@@ -72,6 +72,8 @@ public class ViewMainMenu {
             case "Login_failure":
                 System.out.println("Username or password is incorrect!");
                 break;
+            case "blocked":
+                System.err.println("This user is blocked!!@");
         }
 
 
@@ -154,8 +156,8 @@ public class ViewMainMenu {
     }
 
     private void fromShowListUser() {
-        System.out.printf("%-15s%s%n","User","Role");
         System.out.println(userList);
+        System.out.printf("%-15s%s%n","User","Role");
         for (User user : userList ) {
             System.out.printf("%-15s%s%n",user.getUsername(),new ArrayList<>(user.getRoles()).get(0).getRoleName());
         }

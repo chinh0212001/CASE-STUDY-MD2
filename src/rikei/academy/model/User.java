@@ -99,4 +99,13 @@ public class User implements Serializable {
                 ", status=" + status +
                 '}';
     }
+
+    public RoleName getRoleName() {
+        for(Role role : roles) {
+            if(role.getRoleName() == RoleName.PM) return RoleName.PM;
+            if(role.getRoleName() == RoleName.PLAYER) return RoleName.PLAYER;
+            if(role.getRoleName() == RoleName.COACH) return RoleName.COACH;
+        }
+        return null;
+    }
 }
